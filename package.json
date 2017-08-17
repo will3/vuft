@@ -1,0 +1,19 @@
+{
+  "name": "vuftrausers",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "watchify src/index.js -o js/bundle.js --debug --verbose"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "shortid": "^2.2.8",
+    "three": "^0.86.0"
+  },
+  "devDependencies": {
+    "voxel": "^0.5.0"
+  }
+}
