@@ -2,9 +2,11 @@ var THREE = require('three');
 var scene = require('../core/renderer').scene;
 var Chunk = require('../voxel/chunk');
 var mesher = require('../voxel/mesher');
+var keycode = require('keycode');
 
 module.exports = function() {
 	var obj = new THREE.Object3D();
+	obj.rotation.order = 'ZYX';
 	var chunk = new Chunk();
 	var materials = [];
 
@@ -15,6 +17,9 @@ module.exports = function() {
 	var maxSpeed = 10;
 	var vel = new THREE.Vector3();
 	var friction = 0.97;
+	var keyholds = {};
+	var turnSpeed = 0.1;
+	var gravity = new THREE.Vector3(0, -0.05, 0);
 
 	function start() {
 		scene.add(obj);
@@ -58,13 +63,49 @@ module.exports = function() {
 			}
 			materials = m;
 		}
+
+		window.addEventListener('keydown', onKeyDown);
+		window.addEventListener('keyup', onKeyUp);
+	};
+
+	function onKeyDown(e) {
+		var key = keycode(e);
+		keyholds[key] = true;
+	};
+
+	function onKeyUp(e) {
+		var key = keycode(e);
+		keyholds[key] = false;
 	};
 
 	function tick() {
 		mesher(chunk, shipObj, materials);
 
-		var acc = new THREE.Vector3(0, enginePower, 0).applyEuler(obj.rotation);
+		var forwardAmount = keyholds['up'] ? 1 : 0;
+		var acc = new THREE.Vector3(0, enginePower * forwardAmount, 0).applyEuler(obj.rotation);
 		vel.add(acc);
+
+		if (obj.position.y < 0) {
+			vel.add(new THREE.Vector3(0, 0.1, 0));
+		}
+
+		if (!keyholds['up']) {
+			vel.add(gravity);	
+		}
+
+		var turnAmount = 0;
+		if (keyholds['left']) {
+			turnAmount++;
+		} 	
+
+		if (keyholds['right']) {
+			turnAmount--;
+		}
+
+		obj.rotation.y += turnAmount * turnSpeed;		
+		obj.rotation.z = obj.rotation.y;
+
+		// Step rigid body
 		vel.multiplyScalar(friction);
 		if (vel.length() > maxSpeed) {
 			vel.setLength(maxSpeed);
@@ -74,13 +115,22 @@ module.exports = function() {
 
 	function destroy() {
 		scene.remove(obj);
+
+		window.removeEventListener('keydown', onKeyDown);
+		window.removeEventListener('keyup', onKeyUp);
+	};
+
+	function getForward() {
+		return new THREE.Vector3(0, 1, 0).applyEuler(obj.rotation);
 	};
 
 	var self = {
 		start: start,
 		tick: tick,
 		destroy: destroy,
-		position: obj.position
+		position: obj.position,
+		isPlayer: false,
+		getForward: getForward
 	};
 
 	return self;

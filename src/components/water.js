@@ -30,5 +30,6 @@ module.exports = function() {
 		start: start,
 		tick: tick,
 		destroy: destroy,
+		position: obj.position
 	};
 };

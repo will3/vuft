@@ -9,9 +9,10 @@ module.exports = function() {
 	};
 
 	function tick() {
-		currentPosition.lerp(self.target, 0.1);
+		currentPosition.lerp(self.target, 0.4);
 		var position = currentPosition.clone();
 		position.z = self.distance;
+		position.add(self.ship.getForward().multiplyScalar(4));
 		camera.position.copy(position);
 	};
 
@@ -20,6 +21,8 @@ module.exports = function() {
 		tick: tick,
 		target: new THREE.Vector3(),
 		distance: 200,
+		position: camera.position,
+		ship: null
 	};
 
 	return self;
